@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -30,6 +31,7 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(mTbBar);            //将标题栏换成toolbar
         findViewById(R.id.tb_head).setPadding(0,getStatusBarHeight(),0,0);  //设置标题栏目远离状态栏,和状态栏分离
         setWeatherLocated();                    //设置所在地方天气，将其展示到屏幕中间最上方
+        setBackground();                         //设置背景，根据天气设置背景
     }
 
     /**
@@ -46,7 +48,8 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch(item.getItemId()){
             case R.id.menu_change:
-                Toast.makeText(this, "你点了地区改变一下", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(this,WeatherLocated_Activity.class);
+                startActivity(intent);                                                           //跳转天气界面
                 break;
             case R.id.menu_setting:
                 Toast.makeText(this, "你点了设置一下", Toast.LENGTH_SHORT).show();
@@ -96,8 +99,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * 设置主界面背景的,使用一个动画，提前预制好我们的背景，下雨，晴天，多云，下雪，等到传进来对应的我们就切换，默认使晴天
+     * 设置主界面背景的,使用一个selector，提前预制好我们的背景，下雨，晴天，多云，下雪，等到实际传进来对应的我们就切换，默认是晴天
      */
 
-
+    private void setBackground(){
+    }
 }
