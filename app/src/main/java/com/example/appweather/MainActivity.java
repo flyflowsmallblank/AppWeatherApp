@@ -49,7 +49,8 @@ public class MainActivity extends AppCompatActivity {
         switch(item.getItemId()){
             case R.id.menu_change:
                 Intent intent = new Intent(this,WeatherLocated_Activity.class);
-                startActivity(intent);                                                           //跳转天气界面
+                startActivity(intent);
+                finish();//跳转天气界面,结束当前活动
                 break;
             case R.id.menu_setting:
                 Toast.makeText(this, "你点了设置一下", Toast.LENGTH_SHORT).show();
