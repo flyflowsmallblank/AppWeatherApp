@@ -7,6 +7,7 @@ import androidx.appcompat.widget.Toolbar;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.animation.AlphaAnimation;
@@ -19,6 +20,11 @@ public class MainActivity extends AppCompatActivity {
     private ImageView imgWelcome;
     private Toolbar mTbBar;
     private TextView mTvLocated;
+    private static int count = 0;      //记得改为静态变量，要不找一辈子也找不到
+    //下面是跳转过来需要的变量
+    private String weather_id = null;      //这个是地区天气id,用来求取天气和更改背景
+    private String name = "需要更改地区";        //这个是所在地区的名称
+
 
     @SuppressLint({"MissingInflatedId", "UseSupportActionBar"})  //写这个是因为setActionBar警告
     @Override
@@ -30,6 +36,10 @@ public class MainActivity extends AppCompatActivity {
         mTbBar.setTitle("");                    //将左边那个天气之子暴力清空，使标题栏上的字消失
         setSupportActionBar(mTbBar);            //将标题栏换成toolbar
         findViewById(R.id.tb_head).setPadding(0,getStatusBarHeight(),0,0);  //设置标题栏目远离状态栏,和状态栏分离
+        //这里是跳转之后的，获得传递过来的信息
+        if(count%2==1){
+            getIntentExtra();
+        }
         setWeatherLocated();                    //设置所在地方天气，将其展示到屏幕中间最上方
         setBackground();                         //设置背景，根据天气设置背景
     }
@@ -48,6 +58,8 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch(item.getItemId()){
             case R.id.menu_change:
+                count++;
+                Log.d("LX", "onOptionsItemSelected: count"+count);
                 Intent intent = new Intent(this,WeatherLocated_Activity.class);
                 startActivity(intent);
                 finish();//跳转天气界面,结束当前活动
@@ -90,13 +102,23 @@ public class MainActivity extends AppCompatActivity {
         }
         return result;
     }
+    /**
+     * 下面写一个获取别的活动传递过来的信息的方法
+     */
+    private void getIntentExtra(){
+        Bundle extras = getIntent().getExtras();
+        name = extras.getString("name");
+        weather_id = extras.getString("weather_id");
+        Log.d("LX", "getIntentExtra: "+name+"的天气id"+weather_id);
+        startConnection("");
+    }
 
     /**
      * 下面将写一个设置地区的显示文字,那个地区显示id叫tv_located
      */
 
     private void setWeatherLocated(){
-        mTvLocated.setText("我爱你");
+        mTvLocated.setText(name);
     }
 
     /**
@@ -104,5 +126,14 @@ public class MainActivity extends AppCompatActivity {
      */
 
     private void setBackground(){
+    }
+
+    /**
+     * 进行天气的网络请求,weather_id已知
+     */
+    private void startConnection(String mUrl){
+        new Thread(()->{
+
+        }).start();
     }
 }
