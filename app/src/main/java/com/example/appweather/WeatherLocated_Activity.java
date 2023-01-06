@@ -74,6 +74,7 @@ public class WeatherLocated_Activity extends AppCompatActivity {
             public void onItemClick(View view, int position) {
                 if(weather_id_data[0]!=null){
                     startIntent(position);
+                    finish();
                 }
                 setPosition(position);
                 mmUrl.append('/').append(idData[position]);

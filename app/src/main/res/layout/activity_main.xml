@@ -24,37 +24,76 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="@color/ic_launcher_background"
-            android:textSize="20dp"
+            android:textSize="20sp"
             android:layout_gravity="center"/>
     </androidx.appcompat.widget.Toolbar>
 
-    <TextView
-        android:id="@+id/tv_temp"
+    <FrameLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintVertical_bias="0.35"
-        android:textSize="75sp"
-        android:textColor="@color/black"
+        app:layout_constraintVertical_bias="0.37"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/tv_temp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintVertical_bias="0.37"
+            android:gravity="center"
+            android:textSize="75sp"
+            android:textColor="@color/white"
+            android:textStyle="normal"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tv_temp_degree"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="100dp"
+            android:layout_marginTop="15dp"
+            android:textSize="30sp"
+            android:text="℃"
+            android:textColor="@color/white"
+            android:textStyle="normal" />
+
+    </FrameLayout>
+
+
+    <TextView
+        android:id="@+id/tv_weather_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintVertical_bias="0.55"
+        android:textSize="35sp"
+        android:textColor="@color/white"
         android:textStyle="normal"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+
     <ImageView
         android:id="@+id/img_welcome"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:contentDescription="@string/start_animate"
         android:scaleType="centerCrop"
         android:scaleX="1.05"
         android:scaleY="1.05"
-        android:contentDescription="@string/start_animate"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0"
         app:srcCompat="@drawable/welcome_img" />
-
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

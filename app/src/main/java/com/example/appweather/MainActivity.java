@@ -5,7 +5,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -29,9 +31,11 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 public class MainActivity extends AppCompatActivity {
-    private ImageView imgWelcome;
+    private ImageView imgWelcome;      //图画
     private Toolbar mTbBar;
-    private TextView mTvLocated;
+    private TextView mTvLocated;         //这是上面的地址
+    private TextView mTvTemp;            //中间的温度
+    private TextView mTvWeatherText;     //中间的天气
     private static int count = 0;      //记得改为静态变量，要不找一辈子也找不到
     //下面是跳转过来需要的变量
     private String weather_id = null;      //这个是地区天气id,用来求取天气和更改背景
@@ -53,9 +57,7 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(mTbBar);            //将标题栏换成toolbar
         findViewById(R.id.tb_head).setPadding(0,getStatusBarHeight(),0,0);  //设置标题栏目远离状态栏,和状态栏分离
         //这里是跳转之后的，获得传递过来的信息
-        if(count%2==1){
-            getIntentExtra();
-        }
+        getIntentExtra();                       //每次跳转都需要的方法,获取信息，网络请求
         setWeatherLocated();                    //设置所在地方天气，将其展示到屏幕中间最上方
         setBackground();                         //设置背景，根据天气设置背景
     }
@@ -74,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch(item.getItemId()){
             case R.id.menu_change:
-                count++;
+                count++;   //跳转之后count就会加一
                 Log.d("LX", "onOptionsItemSelected: count"+count);
                 Intent intent = new Intent(this,WeatherLocated_Activity.class);
                 startActivity(intent);
@@ -95,6 +97,8 @@ public class MainActivity extends AppCompatActivity {
         imgWelcome = findViewById(R.id.img_welcome);
         mTbBar = (Toolbar) findViewById(R.id.tb_head);
         mTvLocated = findViewById(R.id.tv_located);
+        mTvTemp = findViewById(R.id.tv_temp);
+        mTvWeatherText = findViewById(R.id.tv_weather_text);
     }
 
     private void initWelcomeAnimate(){              //入场动画
@@ -122,9 +126,13 @@ public class MainActivity extends AppCompatActivity {
      * 下面写一个获取别的活动传递过来的信息的方法
      */
     private void getIntentExtra(){
-        Bundle extras = getIntent().getExtras();
-        name = extras.getString("name");
-        weather_id = extras.getString("weather_id");
+        if(count==0){           //如果刚打开界面，就从之前存储的文件找，请求网络
+            getData();
+        }else{                 //打开过后count++，获得之后返回的数据
+            Bundle extras = getIntent().getExtras();
+            name = extras.getString("name");
+            weather_id = extras.getString("weather_id");
+        }
         Log.d("LX", "getIntentExtra: "+name+"的天气id"+weather_id);
         StringBuilder mUrl = new StringBuilder("https://devapi.qweather.com/v7/weather/now?location=");
         mUrl.append(weather_id).append("&key=12d6778b71cb41e092299b6629f43438");
@@ -145,7 +153,9 @@ public class MainActivity extends AppCompatActivity {
      */
 
     private void setTempAndText(){
-
+        saveData();
+        mTvTemp.setText(String.valueOf(temperature));
+        mTvWeatherText.setText(weatherText);
     }
 
     /**
@@ -158,6 +168,7 @@ public class MainActivity extends AppCompatActivity {
     /**
      * 进行天气的网络请求,weather_id已知
      */
+
     private void startConnection(String mUrl){
         new Thread(()->{
             try{
@@ -235,5 +246,27 @@ public class MainActivity extends AppCompatActivity {
         } catch (JSONException e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * 下面是一个存储的方法,简单的本地存储
+     */
+
+    public void saveData(){
+        SharedPreferences sharedPreferences = getSharedPreferences("地址信息", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString("located",name);
+        editor.putString("weather_id",weather_id);
+        editor.apply();
+    }
+
+    /**
+     * 下面是一个读取saveData的方法
+     */
+
+    private void getData(){
+        SharedPreferences sharedPreferences = getSharedPreferences("地址信息",Context.MODE_PRIVATE);
+        name = sharedPreferences.getString("located","北京");
+        weather_id = sharedPreferences.getString("weather_id","CN101010100");
     }
 }
