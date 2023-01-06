@@ -167,7 +167,7 @@ public class MainActivity extends AppCompatActivity {
                 connection.setConnectTimeout(8000);
                 connection.setConnectTimeout(8000);
                 connection.setRequestProperty("Accept-Language", "zh-CN,zh;q=0.9");
-                connection.setRequestProperty("Accept-Encoding", "gzip,deflate");
+//                connection.setRequestProperty("Accept-Encoding", "gzip,deflate");         //这个请求头删掉就好了
                 connection.connect();
                 InputStream in = connection.getInputStream();
                 Log.d("LX", "可能出问题的地方: "+in);
