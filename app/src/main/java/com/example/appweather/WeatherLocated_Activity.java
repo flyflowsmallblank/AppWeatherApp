@@ -42,7 +42,7 @@ public class WeatherLocated_Activity extends AppCompatActivity {
     private Handler mHandler;
     private Toolbar mTbBar;
     private TextView mTvLocated;
-    private int weather_name;        //所在地的名称
+    private String weather_name = "";        //所在地的名称
     private int position;            //所在地的id
     private StringBuilder mmUrl = new StringBuilder("http://guolin.tech/api/china");    //请求地址的网站
 
@@ -54,7 +54,7 @@ public class WeatherLocated_Activity extends AppCompatActivity {
         startConnection("http://guolin.tech/api/china");  //刚进来时后就进行网络请求
         mHandler = new myHandler();
         findViewById(R.id.tb_located_head).setPadding(0,getStatusBarHeight(),0,0);  //设置标题栏目远离状态栏,和状态栏分离
-        setWeatherLocated();            //设置中间的文字
+
 
     }
     /**
@@ -77,6 +77,7 @@ public class WeatherLocated_Activity extends AppCompatActivity {
                     finish();
                 }
                 setPosition(position);
+                setWeatherLocated();            //设置中间的文字
                 mmUrl.append('/').append(idData[position]);
                 startConnection(mmUrl.toString());
                 Log.d("LX", "onItemClick: "+mmUrl);
@@ -153,6 +154,7 @@ public class WeatherLocated_Activity extends AppCompatActivity {
                 JSONObject jsonObject1 = jsonArray.getJSONObject(i);
                 idData[i] = jsonObject1.getInt("id");
                 locatedData[i] = jsonObject1.getString("name");
+                Log.d("LX", "locatedData "+locatedData[i]);
                 try{
                     weather_id_data[i] = jsonObject1.getString("weather_id");
                 }catch (Exception e){
@@ -202,7 +204,8 @@ public class WeatherLocated_Activity extends AppCompatActivity {
      */
 
     private void setWeatherLocated(){
-        mTvLocated.setText("我爱你");
+        weather_name = weather_name.concat(locatedData[position]);
+        mTvLocated.setText(weather_name);
     }
 
     /**

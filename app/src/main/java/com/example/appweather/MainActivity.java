@@ -3,6 +3,7 @@ package com.example.appweather;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.constraintlayout.widget.ConstraintLayout;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -33,6 +34,7 @@ import java.net.URL;
 public class MainActivity extends AppCompatActivity {
     private ImageView imgWelcome;      //图画
     private Toolbar mTbBar;
+    private ConstraintLayout constraintLayout;
     private TextView mTvLocated;         //这是上面的地址
     private TextView mTvTemp;            //中间的温度
     private TextView mTvWeatherText;     //中间的天气
@@ -59,7 +61,6 @@ public class MainActivity extends AppCompatActivity {
         //这里是跳转之后的，获得传递过来的信息
         getIntentExtra();                       //每次跳转都需要的方法,获取信息，网络请求
         setWeatherLocated();                    //设置所在地方天气，将其展示到屏幕中间最上方
-        setBackground();                         //设置背景，根据天气设置背景
     }
 
     /**
@@ -99,6 +100,7 @@ public class MainActivity extends AppCompatActivity {
         mTvLocated = findViewById(R.id.tv_located);
         mTvTemp = findViewById(R.id.tv_temp);
         mTvWeatherText = findViewById(R.id.tv_weather_text);
+        constraintLayout = findViewById(R.id.layout_main);
     }
 
     private void initWelcomeAnimate(){              //入场动画
@@ -153,6 +155,7 @@ public class MainActivity extends AppCompatActivity {
      */
 
     private void setTempAndText(){
+        setBackground();                         //设置背景，根据天气设置背景
         saveData();
         mTvTemp.setText(String.valueOf(temperature));
         mTvWeatherText.setText(weatherText);
@@ -162,7 +165,25 @@ public class MainActivity extends AppCompatActivity {
      * 设置主界面背景的,使用一个selector，提前预制好我们的背景，下雨，晴天，多云，下雪，等到实际传进来对应的我们就切换，默认是晴天
      */
 
+    @SuppressLint("ResourceType")
     private void setBackground(){
+        switch (weatherText){
+            case "晴":
+                constraintLayout.setBackgroundResource(R.drawable.weather_fine_day);
+                break;
+            case "多云":
+                constraintLayout.setBackgroundResource(R.drawable.weather_cloud_day);
+                break;
+            case "雪":
+                constraintLayout.setBackgroundResource(R.drawable.weather_snow_day);
+                break;
+            case "雨":
+            case "小雨":
+            case "中雨":
+            case "大雨":
+                constraintLayout.setBackgroundResource(R.drawable.weather_rain_day);
+                break;
+        }
     }
 
     /**
