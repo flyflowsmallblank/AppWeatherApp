@@ -4,11 +4,13 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -38,6 +40,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView mTvLocated;         //这是上面的地址
     private TextView mTvTemp;            //中间的温度
     private TextView mTvWeatherText;     //中间的天气
+    private SwipeRefreshLayout mSrl;     //下拉刷新
     private static int count = 0;      //记得改为静态变量，要不找一辈子也找不到
     //下面是跳转过来需要的变量
     private String weather_id = null;      //这个是地区天气id,用来求取天气和更改背景
@@ -53,6 +56,9 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initView();                              //初始化找id
+        mSrl.setProgressBackgroundColorSchemeColor(Color.parseColor("#FF03DAC5")); //设置刷新背景
+        //设置刷新之后应该做的事
+        my_refresh();
         initWelcomeAnimate();                    //找动画
         mHandler = new MyHandler();
         mTbBar.setTitle("");                    //将左边那个天气之子暴力清空，使标题栏上的字消失
@@ -61,6 +67,27 @@ public class MainActivity extends AppCompatActivity {
         //这里是跳转之后的，获得传递过来的信息
         getIntentExtra();                       //每次跳转都需要的方法,获取信息，网络请求
         setWeatherLocated();                    //设置所在地方天气，将其展示到屏幕中间最上方
+    }
+
+    /**
+     * 设置刷新之后的内部逻辑
+     */
+
+    private void my_refresh() {
+        //首先监听按钮
+        mSrl.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                Toast.makeText(MainActivity.this, "正在刷新中", Toast.LENGTH_SHORT).show();
+                mSrl.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        startConnection("https://devapi.qweather.com/v7/weather/now?location="+weather_id+"&key=12d6778b71cb41e092299b6629f43438");
+                        mSrl.setRefreshing(false);
+                    }
+                },1000);
+            }
+        });
     }
 
     /**
@@ -101,6 +128,7 @@ public class MainActivity extends AppCompatActivity {
         mTvTemp = findViewById(R.id.tv_temp);
         mTvWeatherText = findViewById(R.id.tv_weather_text);
         constraintLayout = findViewById(R.id.layout_main);
+        mSrl = findViewById(R.id.srl_refresh);
     }
 
     private void initWelcomeAnimate(){              //入场动画
@@ -175,6 +203,9 @@ public class MainActivity extends AppCompatActivity {
                 constraintLayout.setBackgroundResource(R.drawable.weather_cloud_day);
                 break;
             case "雪":
+            case "小雪":
+            case "中雪":
+            case "大雪":
                 constraintLayout.setBackgroundResource(R.drawable.weather_snow_day);
                 break;
             case "雨":
