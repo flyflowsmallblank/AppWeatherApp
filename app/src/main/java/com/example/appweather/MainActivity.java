@@ -4,6 +4,8 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.annotation.SuppressLint;
@@ -23,6 +25,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -32,6 +35,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
     private ImageView imgWelcome;      //图画
@@ -41,6 +45,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView mTvTemp;            //中间的温度
     private TextView mTvWeatherText;     //中间的天气
     private SwipeRefreshLayout mSrl;     //下拉刷新
+    private RecyclerView mRvInfo;        //下面天气预报的信息
     private static int count = 0;      //记得改为静态变量，要不找一辈子也找不到
     //下面是跳转过来需要的变量
     private String weather_id = null;      //这个是地区天气id,用来求取天气和更改背景
@@ -48,6 +53,7 @@ public class MainActivity extends AppCompatActivity {
     private Handler mHandler;                //通信所需
     private int temperature;
     private String weatherText;
+    private ArrayList<DayInformation> data = new ArrayList<>();     //七日天气预报的信息存储
 
 
     @SuppressLint({"MissingInflatedId", "UseSupportActionBar"})  //写这个是因为setActionBar警告
@@ -57,8 +63,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         initView();                              //初始化找id
         mSrl.setProgressBackgroundColorSchemeColor(Color.parseColor("#FF03DAC5")); //设置刷新背景
-        //设置刷新之后应该做的事
-        my_refresh();
+        my_refresh();                           //设置刷新之后应该做的事
         initWelcomeAnimate();                    //找动画
         mHandler = new MyHandler();
         mTbBar.setTitle("");                    //将左边那个天气之子暴力清空，使标题栏上的字消失
@@ -128,6 +133,7 @@ public class MainActivity extends AppCompatActivity {
         mTvWeatherText = findViewById(R.id.tv_weather_text);
         constraintLayout = findViewById(R.id.layout_main);
         mSrl = findViewById(R.id.srl_refresh);
+        mRvInfo = findViewById(R.id.rv_weather_information);
     }
 
     private void initWelcomeAnimate(){              //入场动画
@@ -166,7 +172,12 @@ public class MainActivity extends AppCompatActivity {
         StringBuilder mUrl = new StringBuilder("https://devapi.qweather.com/v7/weather/now?location=");
         mUrl.append(weather_id).append("&key=12d6778b71cb41e092299b6629f43438");
         startConnection(mUrl.toString());
-        Log.d("LX", "所获取天气的网址是 "+mUrl);
+        Log.d("LX", "所获取实时天气的网址是 "+mUrl);
+        //下面是七天的天气预报
+        StringBuilder mUrlForest = new StringBuilder("https://devapi.qweather.com/v7/weather/7d?location=");
+        mUrlForest.append(weather_id).append("&key=12d6778b71cb41e092299b6629f43438");
+        startConnection(mUrlForest.toString());
+        Log.d("LX", "所获取的预告天气是 " +mUrlForest );
     }
 
     /**
@@ -186,6 +197,16 @@ public class MainActivity extends AppCompatActivity {
         saveData();
         mTvTemp.setText(String.valueOf(temperature));
         mTvWeatherText.setText(weatherText);
+    }
+
+    /**
+     * 根据传过来的信息设置下面的recyclerView
+     */
+
+    private void setForestInfo() {
+        Adapter_forest_rv adapter_forest_rv = new Adapter_forest_rv(data,7); //构造适配器,设置显示七天的
+        mRvInfo.setAdapter(adapter_forest_rv);            //同时设置我们recyclerView的适配器
+        mRvInfo.setLayoutManager(new GridLayoutManager(this,1));  //设置七天预报数据一溜下来；
     }
 
     /**
@@ -232,9 +253,9 @@ public class MainActivity extends AppCompatActivity {
 //                connection.setRequestProperty("Accept-Encoding", "gzip,deflate");         //这个请求头删掉就好了
                 connection.connect();
                 InputStream in = connection.getInputStream();
-                Log.d("LX", "可能出问题的地方: "+in);
+                Log.d("LX", "处理之前的输入流: "+in);
                 String responseData = streamToString(in);
-                Log.d("LX", "可能出问题的地方 "+responseData);
+                Log.d("LX", "处理完之后的输入流 "+responseData);
                 Message message = new Message();
                 message.obj = responseData;
                 mHandler.sendMessage(message);
@@ -278,13 +299,27 @@ public class MainActivity extends AppCompatActivity {
         public void handleMessage(@NonNull Message msg) {
             super.handleMessage(msg);
             String respondData = msg.obj.toString();
-            jsonDecode(respondData);
-            setTempAndText();      //返回数据后第一时间更改温度和文本
+            try {
+                JSONObject jsonObject = new JSONObject(respondData);  //测试一下
+                if(jsonObject.has("now")){
+                    Log.d("LX", "我成功匹配实时天气");
+                    jsonDecode(respondData);  //这个是温度和天气状况文本的改变
+                    setTempAndText();      //第一时间更改温度和文本
+                    //上面是匹配现在的实时天气
+                    //下面匹配的是七天预告天气
+                }else if(jsonObject.has("daily")){
+                    Log.d("LX", "我成功匹配预告天气");
+                    jsonDecodeForest(respondData);
+                    setForestInfo();      //第一时间更改温度和文本
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
     /**
-     *下面是一个解码json的方法
+     *下面是两个解码json的方法
      */
 
     private void jsonDecode(String respondData) {
@@ -295,6 +330,29 @@ public class MainActivity extends AppCompatActivity {
             weatherText = jsonObject1.getString("text");
             Log.d("LX", "温度和天气文本是 "+temperature+weatherText);
         } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void jsonDecodeForest(String respondData) {
+        try{
+            JSONObject jsonObject = new JSONObject(respondData);
+            JSONArray jsonArray = jsonObject.getJSONArray("daily");
+            for (int i = 0; i < jsonArray.length(); i++) {
+                DayInformation dayInformation = new DayInformation();
+                JSONObject jsonObject1 = jsonArray.getJSONObject(i);
+                dayInformation.setDay(jsonObject1.getString("fxDate"));
+                if(jsonObject1.getString("textDay").equals(jsonObject1.getString("textNight"))){
+                    dayInformation.setForestWeatherText(jsonObject1.getString("textDay"));
+                }else{
+                    dayInformation.setForestWeatherText(jsonObject1.getString("textDay")+"转"+jsonObject1.getString("textNight"));
+                }
+                dayInformation.setTempMax(jsonObject1.getString("tempMax"));
+                dayInformation.setTempMin(jsonObject1.getString("tempMin"));
+                data.add(dayInformation);
+            }
+            Log.d("LX", "获得的集合为 ");
+        }catch (JSONException e){
             e.printStackTrace();
         }
     }
