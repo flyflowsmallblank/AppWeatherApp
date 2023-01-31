@@ -78,14 +78,13 @@ public class MainActivity extends AppCompatActivity {
         mSrl.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                Toast.makeText(MainActivity.this, "正在刷新中", Toast.LENGTH_SHORT).show();
                 mSrl.postDelayed(new Runnable() {
                     @Override
                     public void run() {
                         startConnection("https://devapi.qweather.com/v7/weather/now?location="+weather_id+"&key=12d6778b71cb41e092299b6629f43438");
                         mSrl.setRefreshing(false);
                     }
-                },1000);
+                },500);
             }
         });
     }
