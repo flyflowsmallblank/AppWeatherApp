@@ -7,6 +7,8 @@ android {
     compileSdk 32
 
     defaultConfig {
+        aaptOptions.cruncherEnabled = false
+        aaptOptions.useNewCruncher = false
         applicationId "com.example.appweather"
         minSdk 24
         targetSdk 32
