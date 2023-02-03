@@ -74,7 +74,6 @@ public class WeatherLocated_Activity extends AppCompatActivity {
             public void onItemClick(View view, int position) {
                 if(weather_id_data[0]!=null){
                     startIntent(position);
-                    finish();
                 }
                 setPosition(position);
                 setWeatherLocated();            //设置中间的文字
@@ -217,6 +216,8 @@ public class WeatherLocated_Activity extends AppCompatActivity {
         intent.putExtra("name",locatedData[position]);                    //传递天气名称
         Log.d("LX", "startIntent中的weather——id: "+weather_id_data[position]);
         Log.d("LX", "startIntent中的name: "+locatedData[position]);
+        intent.setClass(WeatherLocated_Activity.this,MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);     //上下两步操作会清除之前的所有活动
         startActivity(intent);
         finish();
     }
