@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
@@ -24,6 +25,9 @@ import android.view.animation.Animation;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.example.appweather.Adapter.Adapter_TwentyFour_Hour;
+import com.example.appweather.Adapter.Adapter_forest_rv;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -46,6 +50,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView mTvWeatherText;     //中间的天气
     private SwipeRefreshLayout mSrl;     //下拉刷新
     private RecyclerView mRvInfo;        //下面天气预报的信息
+    private RecyclerView mRvHour;           //24h天气预报
     private static int count = 0;      //记得改为静态变量，要不找一辈子也找不到
     //下面是跳转过来需要的变量
     private String weather_id = null;      //这个是地区天气id,用来求取天气和更改背景
@@ -54,6 +59,7 @@ public class MainActivity extends AppCompatActivity {
     private int temperature;
     private String weatherText;
     private ArrayList<DayInformation> data = new ArrayList<>();     //七日天气预报的信息存储
+    private ArrayList<OnTimeHour> data2 = new ArrayList<>();         //24小时天气预报的信息存储
 
 
     @SuppressLint({"MissingInflatedId", "UseSupportActionBar"})  //写这个是因为setActionBar警告
@@ -134,6 +140,7 @@ public class MainActivity extends AppCompatActivity {
         constraintLayout = findViewById(R.id.layout_main);
         mSrl = findViewById(R.id.srl_refresh);
         mRvInfo = findViewById(R.id.rv_weather_information);
+        mRvHour = findViewById(R.id.rv_hour);
     }
 
     private void initWelcomeAnimate(){              //入场动画
@@ -178,6 +185,11 @@ public class MainActivity extends AppCompatActivity {
         mUrlForest.append(weather_id).append("&key=12d6778b71cb41e092299b6629f43438");
         startConnection(mUrlForest.toString());
         Log.d("LX", "所获取的预告天气是 " +mUrlForest );
+        //下面是24小时的天气预报
+        StringBuilder mUrlHour = new StringBuilder("https://devapi.qweather.com/v7/weather/24h?location=");
+        mUrlHour.append(weather_id).append("&key=12d6778b71cb41e092299b6629f43438");
+        startConnection(mUrlHour.toString());
+        Log.d("LX", "24h预告天气的网址为 " + mUrlHour);
     }
 
     /**
@@ -207,6 +219,15 @@ public class MainActivity extends AppCompatActivity {
         Adapter_forest_rv adapter_forest_rv = new Adapter_forest_rv(data,7); //构造适配器,设置显示七天的
         mRvInfo.setAdapter(adapter_forest_rv);            //同时设置我们recyclerView的适配器
         mRvInfo.setLayoutManager(new GridLayoutManager(this,1));  //设置七天预报数据一溜下来；
+    }
+
+    private void setHourInfo() {
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+        linearLayoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
+        mRvHour.setLayoutManager(linearLayoutManager);
+        Adapter_TwentyFour_Hour adapter_twentyFour_hour = new Adapter_TwentyFour_Hour(data2);
+        mRvHour.setAdapter(adapter_twentyFour_hour);
+//        mRvHour.setLayoutManager(new GridLayoutManager(this,1));
     }
 
     /**
@@ -311,6 +332,10 @@ public class MainActivity extends AppCompatActivity {
                     Log.d("LX", "我成功匹配预告天气");
                     jsonDecodeForest(respondData);
                     setForestInfo();      //第一时间更改温度和文本
+                }else if(jsonObject.has("hourly")){
+                    Log.d("LX", "我成功匹配24小时天气 ");
+                    jsonDecodeHour(respondData);
+                    setHourInfo();
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -318,8 +343,9 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+
     /**
-     *下面是两个解码json的方法
+     *下面是三个解码json的方法
      */
 
     private void jsonDecode(String respondData) {
@@ -330,6 +356,23 @@ public class MainActivity extends AppCompatActivity {
             weatherText = jsonObject1.getString("text");
             Log.d("LX", "温度和天气文本是 "+temperature+weatherText);
         } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void jsonDecodeHour(String respondData) {
+        try{
+            JSONObject jsonObject = new JSONObject(respondData);
+            JSONArray jsonArray = jsonObject.getJSONArray("hourly");
+            for (int i = 0; i < jsonArray.length(); i++) {
+                OnTimeHour onTimeHour = new OnTimeHour();
+                JSONObject jsonObject1 = jsonArray.getJSONObject(i);
+                onTimeHour.setTime(jsonObject1.getString("fxTime"));
+                onTimeHour.setTemp(jsonObject1.getString("temp"));
+                data2.add(onTimeHour);
+            }
+            Log.d("LX", "获得的集合为 ");
+        }catch (JSONException e){
             e.printStackTrace();
         }
     }

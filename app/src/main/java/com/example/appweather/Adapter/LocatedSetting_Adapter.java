@@ -1,14 +1,16 @@
-package com.example.appweather;
+package com.example.appweather.Adapter;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.appweather.OnItemClickListener;
+import com.example.appweather.R;
 
 public class LocatedSetting_Adapter extends RecyclerView.Adapter<LocatedSetting_Adapter.InnerHolder>{
     private OnItemClickListener mOnItemClickListener;  //声明接口，下面有方法传入

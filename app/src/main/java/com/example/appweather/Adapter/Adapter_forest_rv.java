@@ -1,4 +1,4 @@
-package com.example.appweather;
+package com.example.appweather.Adapter;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -7,6 +7,9 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.appweather.DayInformation;
+import com.example.appweather.R;
 
 import java.util.ArrayList;
 
